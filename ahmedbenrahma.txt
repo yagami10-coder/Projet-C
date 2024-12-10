@@ -1,0 +1,138 @@
+//                                                  ****Gestion d'une bibliothèque de livres****.          Realise Par Ahmed Ben Rahma
+// >>>>Description du projet
+//Ce programme permet de :
+
+// 1 - Ajouter des livres avec leurs informations (titre, auteur, année de publication).
+// 2 -Afficher la liste des livres.
+// 3 - Sauvegarder les informations des livres dans un fichier.
+// 4 -Charger les livres à partir d'un fichier.
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    char titre[50];
+    char auteur[50];
+    int annee;
+} Livre;
+
+// 1 - fonction ajouterLivre :lire les informations d' un livre et l'ajouter a une liste dynamique
+
+void ajouterLivre(Livre **bibliotheque, int *nbLivres) {
+    Livre livre;
+    printf("Titre: ");
+    scanf(" %[^\n]", livre.titre); // Lire une chaîne avec espaces
+    printf("Auteur: ");
+    scanf(" %[^\n]", livre.auteur);
+    printf("Année de publication: ");
+    scanf("%d", &livre.annee);
+
+    // Réallocation de mémoire pour le nouveau livre
+    *bibliotheque == realloc(*bibliotheque, (*nbLivres + 1) * sizeof(Livre));
+    if (*bibliotheque == NULL) {
+        printf("Erreur de mémoire!\n");
+        exit(1);
+    }
+
+    (*bibliotheque)[*nbLivres] = livre;
+    (*nbLivres)++;
+}
+
+// 2 - fonction Afficher les livres : Afficher les informations de tous les livres enregistrés
+
+void afficherLivres(Livre *bibliotheque, int nbLivres) {
+    if (nbLivres == 0) {
+        printf("Aucun livre enregistré.\n");
+        return;
+    }
+
+    for (int i = 0; i < nbLivres; i++) {
+        printf("Livre %d :\n", i + 1);
+        printf("  Titre  : %s\n", bibliotheque[i].titre);
+        printf("  Auteur : %s\n", bibliotheque[i].auteur);
+        printf("  Année  : %d\n", bibliotheque[i].annee);
+    }
+}
+// 3 - fonction Sauvegarder les livres : Enregistrer les informations dans un fichier texte.
+
+void sauvegarderLivres(Livre *bibliotheque, int nbLivres, const char *nomFichier) {
+    FILE *fichier = fopen(nomFichier, "w"); //ouvrir un fichier avec le mode "w"
+    if (fichier == NULL) {
+        printf("Erreur d'ouverture du fichier.\n");
+        return;
+    }
+    // Parcourir tous les livres enregistrés dans le tableau bibliotheque / "fprintf" ;ecrit des donnes dans le fichier
+    for (int i = 0; i < nbLivres; i++) {
+        fprintf(fichier, "%s\n%s\n%d\n",
+            bibliotheque[i].titre, bibliotheque[i].auteur, bibliotheque[i].annee);
+    }
+
+    fclose(fichier);
+    printf("Données sauvegardées dans %s.\n", nomFichier);
+}
+
+// 4- fonction Charger les livres à partir d'un fichier.
+
+void chargerLivres(Livre **bibliotheque, int *nbLivres, const char *nomFichier) {
+    FILE *fichier = fopen(nomFichier, "r");
+    if (fichier == NULL) {
+        printf("Erreur d'ouverture du fichier.\n");
+        return;
+    }
+
+    Livre livre;
+    *nbLivres = 0;
+    *bibliotheque = NULL;
+
+    while (fscanf(fichier, " %[^\n] %[^\n] %d", livre.titre, livre.auteur, &livre.annee) != EOF) {
+        *bibliotheque == realloc(*bibliotheque, (*nbLivres + 1) * sizeof(Livre));
+        if (*bibliotheque == NULL) {
+            printf("Erreur de mémoire!\n");
+            exit(1);
+        }
+        (*bibliotheque)[*nbLivres] = livre;
+        (*nbLivres)++;
+    }
+
+    fclose(fichier);
+    printf("Données chargées depuis %s.\n", nomFichier);
+}
+
+int main() {
+    Livre *bibliotheque = NULL;
+    int nbLivres = 0;
+    int choix;
+    const char *nomFichier = "bibliotheque.txt";
+
+    do {
+        printf("\nBonjour Monsieur\n");
+        printf("\n1. Ajouter un livre\n2. Afficher les livres\n3. Sauvegarder\n4. Charger\n5. Quitter\n");
+        printf("Votre choix : ");
+        scanf("%d", &choix);
+
+        switch (choix) {
+            case 1:
+                ajouterLivre(&bibliotheque, &nbLivres);
+                break;
+            case 2:
+                afficherLivres(bibliotheque, nbLivres);
+                break;
+            case 3:
+                sauvegarderLivres(bibliotheque, nbLivres, nomFichier);
+                break;
+            case 4:
+                chargerLivres(&bibliotheque, &nbLivres, nomFichier);
+                break;
+            case 5:
+                printf("Au revoir!\n");
+                break;
+            default:
+                printf("Choix invalide!\n");
+        }
+    } while (choix != 5);
+
+    free(bibliotheque);
+    return 0;
+}
